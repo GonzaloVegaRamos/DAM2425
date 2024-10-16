@@ -1,49 +1,49 @@
-import sys,time, threading
-
+import sys
+import time
+import threading
 from PyQt6 import QtWidgets, uic
 
 class VentanaSecundaria(QtWidgets.QDialog):  
     def __init__(self, parent=None):
         super(VentanaSecundaria, self).__init__(parent)
-        uic.loadUi("2.ui",self) 
+        uic.loadUi("2.ui", self) 
         self.pushButton.clicked.connect(self.cerrar)
         self.progressBar
 
         self.progreso.clicked.connect(self.automatico)
         self.contador = 0
+        self.is_running = False  # Variable para controlar si el thread está en ejecución
 
-        self.x = threading.Thread(target=self.barra_progreso)
-       
     def barra_progreso(self):
-         
-         for i in range (10000):
-            time.sleep(0.5)
-           
+        for i in range(20):
+            time.sleep(0.5)  # Simula el trabajo
+
+            # Actualiza la barra de progreso
             if self.progressBar.value() < self.progressBar.maximum():
                 self.label.setText("Cargando Tabla...")
-                self.contador +=20
+                self.contador += 5
                 self.progressBar.setValue(self.contador)
-           
-            elif self.progressBar.value() == 100:
-                self.label.setText("Barra Completada")
-                time.sleep(2)
-                self.contador=0
-                self.progressBar.reset()
 
+            # Verifica si la barra de progreso ha llegado a 100
+            if self.progressBar.value() == 100:
+                self.label.setText("Barra Completada")
+                time.sleep(2)  # Espera 2 segundos antes de finalizar 
+                self.is_running = False  # Marca como no en ejecución
+                self.progressBar.setValue(0) 
+                self.cerrar()
+                return  # Termina el thread
 
     def cerrar(self):
         self.close()
 
-    def automatico (self):
-        self.x.start()
-        # for i in range (20):
-        #     time.sleep(1)
-        #     self.current_value += 5
-        #     self.progressBar.setValue(self.current_value) 
-        #     if(self.progressBar.value() == 100):
-        #         self.cerrar()
-
-
+    def automatico(self):
+        if not self.is_running:  # Verifica si el thread no está en ejecución
+            self.is_running = True  # Marca como en ejecución
+            self.contador = 0  # Reinicia el contador
+             # Reinicia el progress bar
+            self.label.setText("Cargando...")  # Cambia el texto de la etiqueta
+            self.x = threading.Thread(target=self.barra_progreso)
+            self.x.start()
 
 
 class Ventana(QtWidgets.QMainWindow):
@@ -80,9 +80,3 @@ miVentana = Ventana()
 miVentana.show()
 
 sys.exit(app.exec())
-
-
-        
-
-
-

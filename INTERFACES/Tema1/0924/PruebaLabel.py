@@ -1,34 +1,34 @@
-
 import sys
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QVBoxLayout, QWidget
- 
-class miventana (QMainWindow):
-    def __init__(self): #Constructor
+
+class MiVentana(QMainWindow):
+    def __init__(self):  # Constructor
         super().__init__()
-        self.setWindowTitle("Mi Ventana") #Nombre de la ventana
+        self.setWindowTitle("Mi Ventana")  # Nombre de la ventana
 
+        # Crear los widgets
         self.label = QLabel()
-
         self.input = QLineEdit()
+
+        # Conectar la señal del QLineEdit al QLabel
         self.input.textChanged.connect(self.label.setText)
 
+        # Crear el layout y agregar los widgets
         layout = QVBoxLayout()
         layout.addWidget(self.input)
         layout.addWidget(self.label)
 
+        # Crear un QWidget y establecer el layout
         container = QWidget()
         container.setLayout(layout)
 
+        # Establecer el QWidget como el widget central
+        self.setCentralWidget(container)
 
-        
-       
-        self.setCentralWidget(layout) #Cambiar la posición en el centro de la ventana
-        #button.clicked.connect(self.clickado)
-        
-app = QApplication(sys.argv)
-ventana = miventana()
-ventana.show()
-app.exec()
-    #def clickado(self):
-        #print("clickado") 
+# Iniciar la aplicación
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    ventana = MiVentana()
+    ventana.show()
+    sys.exit(app.exec())
