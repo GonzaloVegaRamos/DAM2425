@@ -123,7 +123,7 @@ public class EjercicioCRUD {
 
         for (int i = 0; i < listaProductos.size(); i++) {
             Producto p = listaProductos.get(i); // Obtiene el producto en el índice actual
-            System.out.printf("%d. %s - %.2f€ - Cantidad: %d\n   Descripción: %s\n",
+            System.out.printf("%d. %s - %.2f - Cantidad: %d\n   Descripción: %s\n",
                     (i + 1), p.nombre, p.precio, p.cantidad, p.descripcion);
         }
     }
