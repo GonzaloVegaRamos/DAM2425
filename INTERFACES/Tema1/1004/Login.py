@@ -1,7 +1,9 @@
-import sys
+import sys,os
 from PyQt6.QtWidgets import (QApplication, QWidget,
                              QPushButton, QLineEdit, QGridLayout,QLabel,QDialog,QVBoxLayout)
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+usuariosui_file_path = os.path.join(script_dir, "Usuarios.txt")
 class Login(QWidget):
 
     def __init__(self):
@@ -45,7 +47,7 @@ class Login(QWidget):
         nom = self.nombre.text()
         pas = self.passwd.text()
         
-        with open("Usuarios.txt", "r") as archivo:
+        with open(usuariosui_file_path, "r") as archivo:
           
           for linea in archivo:
                     
@@ -59,7 +61,7 @@ class Login(QWidget):
                     else:
                       
                       try:
-                           with open("Usuarios.txt", "a") as archivo:
+                           with open(usuariosui_file_path, "a") as archivo:
                             archivo.write(nom)
                             archivo.write(" ")
                             archivo.write(pas)
@@ -82,7 +84,7 @@ class Login(QWidget):
             pas = self.passwd.text()
             self.error.setText(" ") 
 
-            with open("Usuarios.txt", "r") as archivo:
+            with open(usuariosui_file_path, "r") as archivo:
                 for linea in archivo:
                     usuario = (nom +" "+pas+"\n")
 

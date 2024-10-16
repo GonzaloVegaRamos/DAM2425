@@ -1,12 +1,16 @@
 import sys
+import os
 from PyQt6 import QtWidgets, uic
 from PyQt6.QtGui import QIntValidator
 
-# Ventana principal
+script_dir = os.path.dirname(os.path.abspath(__file__))
+Conversorui_file_path = os.path.join(script_dir, "Conversor.ui")
+añadirMonedaui_file_path = os.path.join(script_dir, "añadirMoneda.ui")
+
 class Ventana(QtWidgets.QMainWindow):
     def __init__(self, padre=None):
         QtWidgets.QMainWindow.__init__(self, padre)
-        uic.loadUi("Conversor.ui", self)
+        uic.loadUi(Conversorui_file_path, self)
         self.setWindowTitle("Ejemplo")
 
         self.cerrarVentana.clicked.connect(self.close)
@@ -81,7 +85,7 @@ class Ventana(QtWidgets.QMainWindow):
 class AgregarMoneda(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(AgregarMoneda, self).__init__(parent)
-        uic.loadUi("añadirMoneda.ui", self)
+        uic.loadUi(añadirMonedaui_file_path, self)
 
         self.cerrar.clicked.connect(self.close)
         self.agregar.clicked.connect(self.enviar_datos) 

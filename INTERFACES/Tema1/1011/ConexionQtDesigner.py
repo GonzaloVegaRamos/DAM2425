@@ -1,12 +1,14 @@
-import sys
-import time
-import threading
+import sys,os,time,threading
 from PyQt6 import QtWidgets, uic
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+Dui_file_path = os.path.join(script_dir, "2.ui")
+conexui_file_path = os.path.join(script_dir, "conex.ui")
 
 class VentanaSecundaria(QtWidgets.QDialog):  
     def __init__(self, parent=None):
         super(VentanaSecundaria, self).__init__(parent)
-        uic.loadUi("2.ui", self) 
+        uic.loadUi(Dui_file_path, self) 
         self.pushButton.clicked.connect(self.cerrar)
         self.progressBar
 
@@ -50,7 +52,7 @@ class Ventana(QtWidgets.QMainWindow):
     '''Esta es la clase principal''' 
     def __init__(self, padre=None):
         QtWidgets.QMainWindow.__init__(self, padre)
-        uic.loadUi("conex.ui", self) 
+        uic.loadUi(conexui_file_path, self) 
         self.setWindowTitle("Ejemplo")  
         self.abrir.clicked.connect(self.abrirVentana)
         self.cambiarmensaje.clicked.connect(self.CambiarMensaje)
