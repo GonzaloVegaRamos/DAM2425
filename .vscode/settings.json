@@ -2,7 +2,8 @@
     "java.project.sourcePaths": [
         ".",
         "ACCESO_A_DATOS\\Tema_1",
-        "PROCESOS\\Tema1\\1002"
+        "PROCESOS\\Tema1\\1002",
+        "ACCESO_A_DATOS\\1016"
     ],
     "java.project.referencedLibraries": []
 }
