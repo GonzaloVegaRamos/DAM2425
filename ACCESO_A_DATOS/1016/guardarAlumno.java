@@ -8,11 +8,12 @@
 // funcion para que lo lea y lo muestre por pantalla.
 
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
-import java.io.InputStreamReader;
+
 
 public class guardarAlumno {
     private static String listadoBinario = "alumno.dat";
@@ -36,26 +37,27 @@ public class guardarAlumno {
 
 
     private static void guardarAlumno(String nombre, int edad) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(listadoBinario))) {
-            writer.write(nombre + " " + edad);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(listadoBinario,true))) {
+            writer.write(nombre + " " + edad + "\n");
             System.out.println("Alumno Guardado");
-            leerAlumno();
+            leerAlumnos(nombre,edad);
+           
         } catch (IOException e) {
             System.err.println("Error al guardar los datos: " + e.getMessage());
         }
     }
-    private static void leerAlumno() throws IOException{
-        System.err.println("Alumnos guardados: ");
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));) {
+    private static void leerAlumnos(String nombre, int edad) throws IOException {
+        System.out.println("Alumnos guardados: ");
+        try (BufferedReader reader = new BufferedReader(new FileReader(listadoBinario))) {
             String linea;
-
             // Leer el archivo línea por línea
             while ((linea = reader.readLine()) != null) {
                 System.out.println(linea); // Imprimir la línea leída
-                break;
             }
-            reader.close();
+            System.out.println(nombre+" "+edad);
+        } catch (IOException e) {
+            System.err.println("Error al leer los datos: " + e.getMessage());
         }
-
     }
+    
 }
