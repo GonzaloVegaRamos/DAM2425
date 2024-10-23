@@ -1,3 +1,4 @@
+
 // Siguiendo en el proyecto que nos han encargado, nos piden que generemos una
 // concatenación de ficheros, equivalente al operador >> en entornos Linux. Para ello
 // crearemos una función que reciba dos nombres. El primero debe ser un fichero que
@@ -7,13 +8,14 @@
 // Probar la llamada con el fichero de Alumnos.dat creado en el caso práctico anterior, y
 // comprobar con algun editor hexadecimal que el contenido ha sido correctamente
 // copiado.
+
+
 import java.io.FileReader;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Scanner;
-import java.io.InputStreamReader;
+
 
 public class ConcatenarFicheros {
     private static String listadoBinario = "alumno.dat";

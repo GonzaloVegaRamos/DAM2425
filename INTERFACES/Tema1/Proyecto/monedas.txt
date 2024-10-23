@@ -1,0 +1,2 @@
+peseta,PST,0.04
+Rupia,?,1.6

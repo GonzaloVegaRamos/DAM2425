@@ -31,12 +31,12 @@ public class guardarAlumno {
             String nombre = scanner.nextLine();
             System.out.println("Introduzca su edad:");
             int edad = scanner.nextInt();
-            guardarAlumno(nombre, edad);
+            guardar(nombre, edad);
         }
     }
 
 
-    private static void guardarAlumno(String nombre, int edad) {
+    private static void guardar(String nombre, int edad) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(listadoBinario,true))) {
             writer.write(nombre + " " + edad + "\n");
             System.out.println("Alumno Guardado");

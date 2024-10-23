@@ -6,12 +6,14 @@ from PyQt6.QtGui import QIntValidator
 script_dir = os.path.dirname(os.path.abspath(__file__))
 Conversorui_file_path = os.path.join(script_dir, "Conversor.ui")
 añadirMonedaui_file_path = os.path.join(script_dir, "añadirMoneda.ui")
+monedas_txt = os.path.join(script_dir, "monedas.txt")
 
 class Ventana(QtWidgets.QMainWindow):
     def __init__(self, padre=None):
         QtWidgets.QMainWindow.__init__(self, padre)
         uic.loadUi(Conversorui_file_path, self)
         self.setWindowTitle("Ejemplo")
+        
 
         self.cerrarVentana.clicked.connect(self.close)
         self.ventana_secundaria = None
@@ -31,6 +33,22 @@ class Ventana(QtWidgets.QMainWindow):
 
         self.moneda = [1.0, 0.85, 110.0, 0.75, 0.94]  # USD, EUR, JPY, GBP, CHF
         self.simbolo = ["$", "€", "¥", "£", "₣"]      # USD, EUR, JPY, GBP, CHF
+        self.cargarMoneda()
+
+    def cargarMoneda(self):
+       
+       try:
+         with open(monedas_txt, 'r') as file:
+            for line in file:
+                nombre, simbolo, valor = line.strip().split(',')  
+                valor = float(valor) 
+                self.moneda.append(valor)
+                self.simbolo.append(simbolo)
+                self.monedaEntrante.addItem(nombre+" ("+nombre[:3].upper()+")")
+                self.monedaSaliente.addItem(nombre+" ("+nombre[:3].upper()+")")
+               
+       except FileNotFoundError:
+        print("El archivo 'moneda.txt' no existe.")
 
     def ValorMoneda1(self, index):
         self.moneda1 = self.moneda[index]
@@ -53,21 +71,20 @@ class Ventana(QtWidgets.QMainWindow):
         else:
             self.label.clear()
 
+    #TODO: ELIMINAR_MONEDA
     def eliminar_moneda(self, index):
-    # Verificar que el índice sea válido
+   
      if 0 <= index < len(self.moneda):
-        # Eliminar la moneda de las listas
+       
         del self.moneda[index]
         del self.simbolo[index]
 
-        # Eliminar la moneda de los ComboBox
+        
         self.monedaEntrante.removeItem(index)
         self.monedaSaliente.removeItem(index)
 
-        # Mensaje de confirmación
         QtWidgets.QMessageBox.information(self, "Éxito", "Moneda eliminada con éxito.")
      else:
-        # Mensaje de error si el índice no es válido
         QtWidgets.QMessageBox.warning(self, "Error", "Índice no válido para eliminar la moneda.")        
 
     def abrirVentana(self):
@@ -75,11 +92,26 @@ class Ventana(QtWidgets.QMainWindow):
             self.ventana_secundaria = AgregarMoneda(self)  
         self.ventana_secundaria.show()
 
-    def anadir_moneda(self, nombre, simbolo, valor): 
-        self.moneda.append(valor)
-        self.simbolo.append(simbolo)
-        self.monedaEntrante.addItem(nombre)
-        self.monedaSaliente.addItem(nombre)
+def anadir_moneda(self, nombre, simbolo, valor): 
+    # Comprobar si la moneda ya existe
+    with open(monedas_txt, 'r') as file:
+        for line in file:
+            nombreTxt, simboloTxt, valorTxt = line.strip().split(',')
+
+            if nombreTxt.upper() == nombre.upper():  # Comparación correcta
+                alerta = QtWidgets.QMessageBox()
+                alerta.setText("Esa moneda ya existe")  # Texto del mensaje
+                alerta.setWindowTitle("Advertencia")  # Título de la ventana
+                alerta.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)  # Botón "Aceptar"
+                alerta.exec()  # Mostrar la ventana de alerta
+                return  # Salir de la función si la moneda ya existe
+
+    # Si no existe, agregar la nueva moneda
+    with open(monedas_txt, 'a') as file:  
+        file.write(f"{nombre},{simbolo},{valor}\n") 
+    self.cargarMoneda()  # Cargar las monedas nuevamente
+
+        
         
 
 class AgregarMoneda(QtWidgets.QDialog):
@@ -99,23 +131,14 @@ class AgregarMoneda(QtWidgets.QDialog):
         except ValueError:
             valor = None
 
-        # Verificar que todos los campos estén llenos y el valor sea numérico
         if not nombre or not simbolo or valor is None:
             QtWidgets.QMessageBox.warning(self, "Error", "Por favor, completa todos los campos correctamente.")
             return
 
-        # Enviar los datos a la ventana principal
         parent = self.parent()
-        if isinstance(parent, Ventana):  # Verificar que el padre es una instancia de Ventana
-            parent.anadir_moneda(nombre, simbolo, valor)  # Cambiado aquí
-        self.accept()  # Cerrar la ventana secundaria
-
-
-
-
-
-
-
+        if isinstance(parent, Ventana):  
+            parent.anadir_moneda(nombre, simbolo, valor)  
+        self.accept()  
 
 
 
