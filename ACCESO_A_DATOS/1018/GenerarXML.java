@@ -1,4 +1,3 @@
-
 // En este ejercicio se pretende generar, a partir de estructuras existentes en nuestro
 // programa, un archivo para el equipo de desarrollo web con el que compartimos
 // proyecto.
@@ -7,28 +6,18 @@
 // paralelos con el contenido de los modulos de segundo de DAM cursados por un
 // alumno.
 
-// String[] modulos = ("Acceso a Datos", "Programación de servicios y procesos",
-// "Desarrollo de interfaces", "Programación multimedia y dispositivos moviles",
-// "Sistemas de gestión empresarial", "Empresa e iniciativa emprendedora");
-// boolean[] permiteFCT = {false, true, false, false, true, true);
-// int[] horas = (6, 3, 6, 5, 5, 3);
-// double(] notas = (8.45, 9.0, 8.0, 7.34, 8.2, 7.4);
+// String(] modulos = ["Acceso a Datos", "Programación de servicios y procesos",
+// "Desarrollo de interfaces", "Programacón multimedia y dispositivos móviles",
+// "Sistemas de gestion empresarial", "Empresa e iniciativa emprendedora"):
+// boolean( permiteFCT = ftalse, true, false, false, true, truel:
+// int[]horas =(6, 2, 6,5,5, 3ł:
+// double[] notas = (8.45, 9.0, 8.6, 7.34, 8.2, 7.4);
 
 // Se pide completar el programa para generar un documento XML con la información
-// facilitada. Deberá generar una colección de módulos, donde las opciones de permitir la
+// facilitada. Deberá generar una colección de modulos, donde las opciones de permitir la
 // FCT y el numero de horas son atributos, y el nombre y la nota son elementos internos
 // del XML, como se ve a continuación.
-
-// <? xml version="1.0" encoding="UTF-8" standalone="no"?><modulos>
-// <modulo horas="6" permiteFct="false">
-// <nombre>Acceso a Datos</nombre>
-// <nota>8.45</nota>
-// </modulo>
-// <modulo horas="3" permiteFct="true">
-// cnombre>Programación de servicios y procesos</nombre>
-// <nota>9.0</nota>
-// </modulo>
-
+import java.io.File;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
@@ -38,68 +27,45 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-
-import java.io.File;
-
 public class GenerarXML {
-        public static void main(String[] args) {
-            // Datos de ejemplo
-            String[] modulos = {
-                "Acceso a Datos",
-                "Programación de servicios y procesos",
-                "Desarrollo de interfaces",
-                "Programación multimedia y dispositivos móviles",
-                "Sistemas de gestión empresarial",
-                "Empresa e iniciativa emprendedora"
-            };
-            
-            boolean[] permiteFCT = {false, true, false, false, true, true};
-            int[] horas = {6, 3, 6, 5, 5, 3};
-            double[] notas = {8.45, 9.0, 8.0, 7.34, 8.2, 7.4};
-    
-            try {
-                // Crear un nuevo documento XML
-                DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-    
-                Document doc = docBuilder.newDocument();
-                Element rootElement = doc.createElement("modulos");
-                doc.appendChild(rootElement);
-    
-                // Crear elementos "modulo"
-                for (int i = 0; i < modulos.length; i++) {
-                    Element modulo = doc.createElement("modulo");
-                    modulo.setAttribute("horas", String.valueOf(horas[i]));
-                    modulo.setAttribute("permiteFct", String.valueOf(permiteFCT[i]));
-    
-                    // Crear subelementos "nombre" y "nota"
-                    Element nombre = doc.createElement("nombre");
-                    nombre.appendChild(doc.createTextNode(modulos[i]));
-                    modulo.appendChild(nombre);
-    
-                    Element nota = doc.createElement("nota");
-                    nota.appendChild(doc.createTextNode(String.valueOf(notas[i])));
-                    modulo.appendChild(nota);
-    
-                    // Añadir el módulo al elemento raíz
-                    rootElement.appendChild(modulo);
-                }
-    
-                // Guardar el documento XML
-                TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                Transformer transformer = transformerFactory.newTransformer();
-                DOMSource source = new DOMSource(doc);
-                StreamResult result = new StreamResult(new File("alumno.xml"));
-    
-                transformer.transform(source, result);
-    
-                System.out.println("Archivo XML 'alumno.xml' creado exitosamente!");
-    
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    
+   public GenerarXML() {
+   }
 
+   public static void main(String[] var0) {
+      String[] var1 = new String[]{"Acceso a Datos", "Programaci\u00c3\u00b3n de servicios y procesos", "Desarrollo de interfaces", "Programaci\u00c3\u00b3n multimedia y dispositivos m\u00c3\u00b3viles", "Sistemas de gesti\u00c3\u00b3n empresarial", "Empresa e iniciativa emprendedora"};
+      boolean[] var2 = new boolean[]{false, true, false, false, true, true};
+      int[] var3 = new int[]{6, 3, 6, 5, 5, 3};
+      double[] var4 = new double[]{8.45, 9.0, 8.0, 7.34, 8.2, 7.4};
 
+      try {
+         DocumentBuilderFactory var5 = DocumentBuilderFactory.newInstance();
+         DocumentBuilder var6 = var5.newDocumentBuilder();
+         Document var7 = var6.newDocument();
+         Element var8 = var7.createElement("modulos");
+         var7.appendChild(var8);
+
+         for(int var9 = 0; var9 < var1.length; ++var9) {
+            Element var10 = var7.createElement("modulo");
+            var10.setAttribute("horas", String.valueOf(var3[var9]));
+            var10.setAttribute("permiteFct", String.valueOf(var2[var9]));
+            Element var11 = var7.createElement("nombre");
+            var11.appendChild(var7.createTextNode(var1[var9]));
+            var10.appendChild(var11);
+            Element var12 = var7.createElement("nota");
+            var12.appendChild(var7.createTextNode(String.valueOf(var4[var9])));
+            var10.appendChild(var12);
+            var8.appendChild(var10);
+         }
+
+         TransformerFactory var14 = TransformerFactory.newInstance();
+         Transformer var15 = var14.newTransformer();
+         DOMSource var16 = new DOMSource(var7);
+         StreamResult var17 = new StreamResult(new File("alumno.xml"));
+         var15.transform(var16, var17);
+         System.out.println("Archivo XML 'alumno.xml' creado exitosamente!");
+      } catch (Exception var13) {
+         var13.printStackTrace();
+      }
+
+   }
+}
