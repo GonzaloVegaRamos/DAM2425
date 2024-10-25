@@ -92,10 +92,10 @@ class Ventana(QtWidgets.QMainWindow):
             self.ventana_secundaria = AgregarMoneda(self)  
         self.ventana_secundaria.show()
 
-def anadir_moneda(self, nombre, simbolo, valor): 
-    # Comprobar si la moneda ya existe
-    with open(monedas_txt, 'r') as file:
-        for line in file:
+    def anadir_moneda(self, nombre, simbolo, valor): 
+      # Comprobar si la moneda ya existe
+        with open(monedas_txt, 'r') as file:
+          for line in file:
             nombreTxt, simboloTxt, valorTxt = line.strip().split(',')
 
             if nombreTxt.upper() == nombre.upper():  # Comparación correcta
@@ -106,10 +106,10 @@ def anadir_moneda(self, nombre, simbolo, valor):
                 alerta.exec()  # Mostrar la ventana de alerta
                 return  # Salir de la función si la moneda ya existe
 
-    # Si no existe, agregar la nueva moneda
-    with open(monedas_txt, 'a') as file:  
-        file.write(f"{nombre},{simbolo},{valor}\n") 
-    self.cargarMoneda()  # Cargar las monedas nuevamente
+              # Si no existe, agregar la nueva moneda
+          with open(monedas_txt, 'a') as file:  
+             file.write(f"{nombre},{simbolo},{valor}\n") 
+             self.cargarMoneda()  # Cargar las monedas nuevamente
 
         
         
