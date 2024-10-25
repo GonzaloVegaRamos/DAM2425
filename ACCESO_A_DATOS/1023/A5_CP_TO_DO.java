@@ -63,12 +63,12 @@ class AlumnoTel {
     }
 
   
-    public JSONObject asJSON() {
+    // public JSONObject asJSON() {
        
-        //DO-DO 
+    //     //DO-DO 
         
-        return null;
-    }
+    //     return null;
+    // }
 
 }
 
