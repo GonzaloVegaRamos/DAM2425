@@ -11,7 +11,10 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Añadir Moneda</string>
+  </property>
+  <property name="windowIcon">
+   <iconset theme="help-browser"/>
   </property>
   <widget class="QLabel" name="Nombre">
    <property name="geometry">
@@ -49,7 +52,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Simbolo</string>
+    <string>Simbolo (opcional, si no se elije nada se pondran las 3 primeras letras) </string>
    </property>
   </widget>
   <widget class="QLineEdit" name="introducirNom">

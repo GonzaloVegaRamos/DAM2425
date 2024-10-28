@@ -10,8 +10,14 @@
     <height>292</height>
    </rect>
   </property>
+  <property name="cursor">
+   <cursorShape>PointingHandCursor</cursorShape>
+  </property>
   <property name="windowTitle">
    <string>Conversor de Monedas</string>
+  </property>
+  <property name="windowIcon">
+   <iconset theme="view-refresh"/>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QComboBox" name="monedaEntrante">
@@ -146,7 +152,7 @@
      <string>$</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="aniadir">
+   <widget class="QPushButton" name="btn_aniadir">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -157,6 +163,19 @@
     </property>
     <property name="text">
      <string>Añadir Moneda</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hora">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>20</y>
+      <width>171</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>
