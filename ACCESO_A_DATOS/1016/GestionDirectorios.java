@@ -23,7 +23,7 @@ public class GestionDirectorios {
         File directorio = new File(rutaDirectorio);
 
         if (!directorio.exists() || !directorio.isDirectory()) {
-            System.out.println("El directorio especificado no existe o no es un directorio válido.");
+            
             return;
         }
 

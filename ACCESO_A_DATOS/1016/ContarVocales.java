@@ -1,3 +1,11 @@
+// Muchas veces, en la vida real, los problemas más complejos se solucionan con
+// simples búsquedas y recuentos. En este caso, de manera simplificada, se pide la
+// búsqueda y el recuento de las vocales de un fichero de texto. Para ello se pude crear un
+// programa que reviva un nombre de fichero. Comprobará que dicho fichero exista para
+// posteriormente contar sus vocales. Hay que considerar que las letras pueden estar
+// tanto en mayusculas como en minusculas y suponer que no estan acentuadas.
+// Mostrar por pantalla el resultado de la ejecución.
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -6,7 +14,7 @@ import java.io.IOException;
 public class ContarVocales {
 
     public static void main(String[] args) {
-        // Nombre del fichero se establece directamente
+        
         String nombreFichero = "vocales.txt"; 
         File fichero = new File(nombreFichero);
 

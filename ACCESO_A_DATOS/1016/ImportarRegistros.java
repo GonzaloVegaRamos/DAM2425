@@ -110,9 +110,9 @@ public class ImportarRegistros {
     private static void guardarAlumnosAprobados() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(ARCHIVO_APROBADOS))) {
             for (Alumnos alumno : listaAlumnos) {
-                if (alumno.nota >= 5.0) { // Suponiendo que la nota mínima para aprobar es 5.0
+                if (alumno.nota >= 5.0) {
                     writer.write(alumno.toCSV());
-                    writer.newLine(); // Salto de línea después de cada registro
+                    writer.newLine();
                 }
             }
             System.out.println("Alumnos aprobados guardados en " + ARCHIVO_APROBADOS);

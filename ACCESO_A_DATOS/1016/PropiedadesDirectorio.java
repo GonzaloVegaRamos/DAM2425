@@ -1,3 +1,7 @@
+// Dentro de la gestion de ficheros que nos ha pedido Ana, la jefa de proyectos, se nos
+// pide realizar una funcion que permita saber las propiedades de un elemento, sea
+// indistintamente fichero o directorio.
+
 import java.io.File;
 
 public class PropiedadesDirectorio {
