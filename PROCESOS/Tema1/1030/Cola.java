@@ -14,6 +14,7 @@ public class Cola {
         while (count == capacidad) {
             wait();
         }
+        
         buffer[in] = valor;
         in = (in + 1) % capacidad;
         count++;
