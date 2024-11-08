@@ -70,7 +70,7 @@ public class Carrera {
             }
 
         } catch (IOException e) {
-            System.out.println("Error al leer el archivo JSON: " + e.getMessage());
+            System.out.println( e.getMessage());
         }
     }
 }
