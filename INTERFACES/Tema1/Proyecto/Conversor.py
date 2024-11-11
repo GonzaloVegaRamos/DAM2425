@@ -1,165 +1,92 @@
-import sys
-import os
-from PyQt6 import QtWidgets, uic
-from PyQt6.QtGui import QIntValidator,QFont
-from PyQt6.QtCore import QTimer
-from datetime import datetime
+import cv2
+import pyautogui
+import mediapipe as mp
+import time
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-Conversorui_file_path = os.path.join(script_dir, "Conversor.ui")
-añadirMonedaui_file_path = os.path.join(script_dir, "añadirMoneda.ui")
-monedas_txt = os.path.join(script_dir, "monedas.txt")
+# Configuración de captura de video y Mediapipe
+cap = cv2.VideoCapture(0)
+mp_hands = mp.solutions.hands
+hands = mp_hands.Hands(static_image_mode=False, max_num_hands=1,
+                       min_detection_confidence=0.7, min_tracking_confidence=0.7)
+mp_drawing = mp.solutions.drawing_utils
 
-class Ventana(QtWidgets.QMainWindow):
-    def __init__(self, padre=None):
-        QtWidgets.QMainWindow.__init__(self, padre)
-        uic.loadUi(Conversorui_file_path, self)
-        self.setWindowTitle("Conversor de Monedas")
-        
+# Variables de temporización
+last_action_time = time.time()
+gesture_delay = 1  # Tiempo en segundos para evitar activaciones múltiples
 
-        self.cerrarVentana.clicked.connect(self.close)
-        self.ventana_secundaria = None
-        self.input.setValidator(QIntValidator())
+def is_finger_extended(tip_y, knuckle_y, threshold=0.02):
+    """Determina si un dedo está extendido usando un margen de umbral."""
+    return tip_y < (knuckle_y - threshold)
 
-        self.moneda1 = 1.0
-        self.moneda2 = 1.0
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
 
-        self.input.textChanged.connect(self.actualizar_conversion)
-        self.limpiar.clicked.connect(self.limpiarValores)
-        self.monedaEntrante.currentIndexChanged.connect(self.ValorMoneda1)
-        self.monedaSaliente.currentIndexChanged.connect(self.ValorMoneda2)
-        self.monedaEntrante.currentIndexChanged.connect(self.actualizar_conversion)
-        self.monedaSaliente.currentIndexChanged.connect(self.actualizar_conversion)
+    image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = hands.process(image_rgb)
 
-        self.btn_aniadir.clicked.connect(self.abrirVentana)
+    if results.multi_hand_landmarks:
+        for hand_landmarks in results.multi_hand_landmarks:
+            mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
-        self.moneda = [1.0, 0.85, 110.0, 0.75, 0.94]  # USD, EUR, JPY, GBP, CHF
-        self.simbolo = ["$", "€", "¥", "£", "₣"]      # USD, EUR, JPY, GBP, CHF
-        self.cargarMoneda()
+            # Coordenadas y puntos de referencia de los dedos
+            thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].y
+            index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y
+            middle_tip = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].y
+            ring_tip = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP].y
+            pinky_tip = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].y
 
-        fuente = QFont()
-        fuente.setPointSize(34) 
-        self.hora.setFont(fuente)
-        
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.actualizar_hora)
-        self.timer.start(1000) 
+            index_knuckle = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].y
+            middle_knuckle = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_MCP].y
+            ring_knuckle = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].y
+            pinky_knuckle = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_MCP].y
 
-        
-        self.actualizar_hora()
+            # Detectar si los dedos están extendidos con un margen de umbral
+            index_extended = is_finger_extended(index_tip, index_knuckle)
+            middle_extended = is_finger_extended(middle_tip, middle_knuckle)
+            ring_extended = is_finger_extended(ring_tip, ring_knuckle)
+            pinky_extended = is_finger_extended(pinky_tip, pinky_knuckle)
 
-    def actualizar_hora(self):
-       
-        hora_actual = datetime.now().strftime("%H:%M")
-        self.hora.setText(hora_actual)  
+            # Obtener el tiempo actual para el control de temporización
+            current_time = time.time()
 
-    def cargarMoneda(self):
-      
-      if not os.path.exists(monedas_txt):
-        with open(monedas_txt, 'w') as file:
-            pass 
-       
-      try:
-          with open(monedas_txt, 'r') as file:
-            for line in file:
-                nombre, simbolo, valor = line.strip().split(',')  
-                valor = float(valor) 
-                self.moneda.append(valor)
-                self.simbolo.append(simbolo)
-                self.monedaEntrante.addItem(nombre+" ("+nombre[:3].upper()+")")
-                self.monedaSaliente.addItem(nombre+" ("+nombre[:3].upper()+")")
-               
-      except FileNotFoundError:
-           print("El archivo 'moneda.txt' no existe.")
+            # Detectar Puño Cerrado (todos los dedos doblados)
+            if not index_extended and not middle_extended and not ring_extended and not pinky_extended:
+                if current_time - last_action_time > gesture_delay:
+                    print("Puño cerrado: cerrar aplicación")
+                    cap.release()
+                    cv2.destroyAllWindows()
+                    break  # Salir del bucle principal para terminar la aplicación
 
-    def ValorMoneda1(self, index):
-        self.moneda1 = self.moneda[index]
-        self.simboloEntrante.setText(self.simbolo[index])
+            # Minimizar ventana activa (solo índice extendido, otros dedos doblados)
+            elif index_extended and not middle_extended and not ring_extended and not pinky_extended:
+                if current_time - last_action_time > gesture_delay:
+                    print("Minimizar ventana activa")
+                    pyautogui.hotkey('win', 'down')  # Minimiza la ventana activa en Windows
+                    last_action_time = current_time
 
-    def ValorMoneda2(self, index):
-        self.moneda2 = self.moneda[index]
+            # Cambiar de pestaña/Tabular (índice y medio extendidos, otros dedos doblados)
+            elif index_extended and middle_extended and not ring_extended and not pinky_extended:
+                if current_time - last_action_time > gesture_delay:
+                    print("Cambiar de pestaña/Tabular")
+                    pyautogui.hotkey('ctrl', 'tab')  # Cambia de pestaña en navegadores
+                    last_action_time = current_time
 
-    def limpiarValores(self):
-        self.label.clear()
-        self.input.clear()
+            # Control de volumen con el pulgar arriba/abajo
+            elif thumb_tip < index_knuckle:
+                if current_time - last_action_time > gesture_delay:
+                    pyautogui.press('volumeup')
+                    last_action_time = current_time
+            elif thumb_tip > index_knuckle:
+                if current_time - last_action_time > gesture_delay:
+                    pyautogui.press('volumedown')
+                    last_action_time = current_time
 
-    def actualizar_conversion(self):
-        texto = self.input.text()
-        exponente = self.moneda1 / self.moneda2
-        if texto:
-            valor = float(texto)
-            resultado = valor / exponente
-            self.label.setText(f"{resultado:.2f} {self.simbolo[self.monedaSaliente.currentIndex()]}")
-        else:
-            self.label.clear()
+    cv2.imshow('Hand Gesture', frame)
 
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 
-
-    def abrirVentana(self):
-        if self.ventana_secundaria is None:
-            self.ventana_secundaria = AgregarMoneda(self)  
-        self.ventana_secundaria.show()
-
-    def verificar_moneda(self, nombre, simbolo, valor): 
-     
-        with open(monedas_txt, 'r') as file:
-          
-          for line in file:
-            nombreTxt, simboloTxt, valorTxt = line.strip().split(',')
-
-            if nombreTxt.upper() == nombre.upper(): 
-                alerta = QtWidgets.QMessageBox()
-                alerta.setText("Esa moneda ya existe")  
-                alerta.setWindowTitle("Advertencia")  
-                alerta.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok) 
-                alerta.exec()  
-                return  
-            
-        self.aniadir(nombre, simbolo, valor)
-
-    def aniadir(self, nombre, simbolo, valor):
-          with open(monedas_txt, 'a') as file:
-              file.write(f"{nombre},{simbolo},{valor}\n") 
-          self.cargarMoneda()
-        
-
-class AgregarMoneda(QtWidgets.QDialog):
-    def __init__(self, parent=None):
-        super(AgregarMoneda, self).__init__(parent)
-        uic.loadUi(añadirMonedaui_file_path, self)
-
-        self.introducirValor.setValidator(QIntValidator())
-        self.cerrar.clicked.connect(self.close)
-        self.agregar.clicked.connect(self.enviar_datos) 
-
-    def enviar_datos(self):
-       
-       
-        nombre = self.introducirNom.text().strip()
-        simbolo = self.introducirSim.text().strip()
-        try:
-            valor = float(self.introducirValor.text().strip())
-        except ValueError:
-            valor = None
-
-        if not nombre or valor is None:
-            QtWidgets.QMessageBox.warning(self, "Error", "Por favor, completa todos los campos correctamente.")
-            return
-        
-        parent = self.parent()
-        if isinstance(parent, Ventana):
-          if simbolo is None:
-             simbolo = nombre[:3].upper()  
-          parent.verificar_moneda(nombre, simbolo, valor)  
-          
-        self.introducirNom.clear()
-        self.introducirSim.clear()
-        self.introducirValor.clear()
-        self.accept()  
-
-
-
-app = QtWidgets.QApplication(sys.argv)
-miVentana = Ventana()
-miVentana.show()
-sys.exit(app.exec())
+cap.release()
+cv2.destroyAllWindows()
