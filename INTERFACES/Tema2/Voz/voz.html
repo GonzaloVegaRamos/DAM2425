@@ -1,63 +1,361 @@
-<div>Teachable Machine Audio Model</div>
-<button type="button" onclick="init()">Start</button>
-<div id="label-container"></div>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
-
-<script type="text/javascript">
-  // more documentation available at
-  // https://github.com/tensorflow/tfjs-models/tree/master/speech-commands
-
-  // the link to your model provided by Teachable Machine export panel
-  const URL = "./my_model/";
-
-  async function createModel() {
-    const checkpointURL = URL + "model.json"; // model topology
-    const metadataURL = URL + "metadata.json"; // model metadata
-
-    const recognizer = speechCommands.create(
-      "BROWSER_FFT", // fourier transform type, not useful to change
-      undefined, // speech commands vocabulary feature, not useful for your models
-      checkpointURL,
-      metadataURL
-    );
-
-    // check that model and metadata are loaded via HTTPS requests.
-    await recognizer.ensureModelLoaded();
-
-    return recognizer;
-  }
-
-  async function init() {
-    const recognizer = await createModel();
-    const classLabels = recognizer.wordLabels(); // get class labels
-    const labelContainer = document.getElementById("label-container");
-    for (let i = 0; i < classLabels.length; i++) {
-      labelContainer.appendChild(document.createElement("div"));
-    }
-
-    // listen() takes two arguments:
-    // 1. A callback function that is invoked anytime a word is recognized.
-    // 2. A configuration object with adjustable fields
-    recognizer.listen(
-      (result) => {
-        const scores = result.scores; // probability of prediction for each class
-        // render the probability scores per class
-        for (let i = 0; i < classLabels.length; i++) {
-          const classPrediction =
-            classLabels[i] + ": " + result.scores[i].toFixed(2);
-          labelContainer.childNodes[i].innerHTML = classPrediction;
-        }
-      },
-      {
-        includeSpectrogram: true, // in case listen should return result.spectrogram
-        probabilityThreshold: 0.75,
-        invokeCallbackOnNoiseAndUnknown: true,
-        overlapFactor: 0.5, // probably want between 0.5 and 0.75. More info in README
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mesa de Mezclas DJ</title>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background: linear-gradient(to bottom, #1a1a1a, #0d0d0d);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
       }
-    );
 
-    // Stop the recognition in 5 seconds.
-    // setTimeout(() => recognizer.stopListening(), 5000);
-  }
-</script>
+      .mixer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #222;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.7);
+        width: 900px;
+        height: 600px;
+        position: relative;
+      }
+
+      /* Pistas */
+      .tracks {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+      }
+
+      .track {
+        width: 45%;
+        background: #333;
+        border-radius: 10px;
+        padding: 15px;
+        position: relative;
+        height: 280px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .track-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+
+      .track-header .title {
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .track-header .info {
+        font-size: 14px;
+        opacity: 0.8;
+      }
+
+      /* Barra de progreso */
+      .progress-bar {
+        width: 100%;
+        height: 10px;
+        background: #444;
+        border-radius: 5px;
+        margin: 10px 0;
+      }
+
+      .progress {
+        height: 100%;
+        width: 0%;
+        background: #58d68d;
+        border-radius: 5px;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+      }
+
+      .button {
+        width: 80px;
+        height: 35px;
+        background: #555;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      .button:hover {
+        background: #666;
+      }
+
+      /* Barra deslizante de RPM */
+      .rpm-slider-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 10px;
+      }
+
+      .rpm-slider {
+        width: 80%;
+        height: 10px;
+        background: #444;
+        border-radius: 5px;
+        margin: 5px 0;
+      }
+
+      .rpm-slider-input {
+        width: 100%;
+        height: 100%;
+        background: #58d68d;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .rpm-display {
+        margin-top: 5px;
+        font-size: 14px;
+        color: #ccc;
+      }
+
+      /* Crossfader */
+      .crossfader {
+        width: 80%;
+        height: 20px;
+        background: #444;
+        border-radius: 10px;
+        position: absolute;
+        bottom: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      .crossfader-handle {
+        width: 60px;
+        height: 100%;
+        background: #888;
+        border-radius: 5px;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        cursor: pointer;
+      }
+
+      /* Marcas en el crossfader */
+      .crossfader-markers {
+        position: absolute;
+        width: 100%;
+        top: 0;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 10px;
+      }
+
+      .crossfader-mark {
+        width: 2px;
+        height: 8px;
+        background-color: #bbb;
+        opacity: 0.6;
+      }
+
+      /* Barra de volumen general */
+      .volume-bar-container {
+        position: absolute;
+        right: -30px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 300px;
+        background: #444;
+        border-radius: 10px;
+      }
+
+      .volume-slider {
+        width: 100%;
+        height: 100%;
+        background: #58d68d;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      /* Botón de Loop */
+      .loop-button {
+        width: 80px;
+        height: 35px;
+        background: #555;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        transition: background 0.3s ease;
+      }
+
+      .loop-button.active {
+        background: #58d68d; /* Color cuando está activado */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="mixer">
+      <!-- Contenedor para las pistas -->
+      <div class="tracks">
+        <!-- Track 1 -->
+        <div class="track">
+          <div class="track-header">
+            <div class="title">Canción 1</div>
+            <div class="info">128 RPM - 4/4</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress" style="width: 40%"></div>
+          </div>
+          <div class="controls">
+            <button class="button">Bass</button>
+            <button class="button">Vocals</button>
+            <button class="button">Fx</button>
+            <button class="loop-button" id="loop-button-1">Loop</button>
+            <!-- Botón de Loop -->
+          </div>
+          <div class="rpm-slider-container">
+            <div class="rpm-slider">
+              <input
+                type="range"
+                min="80"
+                max="200"
+                value="128"
+                class="rpm-slider-input"
+                id="rpm-slider-1"
+              />
+            </div>
+            <div class="rpm-display" id="rpm-display-1">128 RPM</div>
+          </div>
+        </div>
+
+        <!-- Track 2 -->
+        <div class="track">
+          <div class="track-header">
+            <div class="title">Canción 2</div>
+            <div class="info">132 RPM - 4/4</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress" style="width: 60%"></div>
+          </div>
+          <div class="controls">
+            <button class="button">Bass</button>
+            <button class="button">Vocals</button>
+            <button class="button">Fx</button>
+            <button class="loop-button" id="loop-button-2">Loop</button>
+            <!-- Botón de Loop -->
+          </div>
+          <div class="rpm-slider-container">
+            <div class="rpm-slider">
+              <input
+                type="range"
+                min="80"
+                max="200"
+                value="132"
+                class="rpm-slider-input"
+                id="rpm-slider-2"
+              />
+            </div>
+            <div class="rpm-display" id="rpm-display-2">132 RPM</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Crossfader -->
+      <div class="crossfader">
+        <div class="crossfader-markers">
+          <!-- Marcas del crossfader -->
+          <div class="crossfader-mark"></div>
+          <div class="crossfader-mark"></div>
+          <div class="crossfader-mark"></div>
+          <div class="crossfader-mark"></div>
+          <div class="crossfader-mark"></div>
+        </div>
+        <div class="crossfader-handle" id="crossfader-handle"></div>
+      </div>
+    </div>
+
+    <!-- Barra de volumen general -->
+    <div class="volume-bar-container">
+      <div class="volume-slider" id="volume-slider"></div>
+    </div>
+
+    <script>
+      // Función para actualizar el estado de los botones de loop
+      const loopButtons = document.querySelectorAll(".loop-button");
+      loopButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          button.classList.toggle("active");
+        });
+      });
+
+      // Funcionalidad de la barra de volumen general
+      const volumeSlider = document.querySelector("#volume-slider");
+      volumeSlider.addEventListener("mousedown", (e) => {
+        const rect = volumeSlider.getBoundingClientRect();
+        const mouseMove = (moveEvent) => {
+          let volume = (moveEvent.clientY - rect.top) / rect.height;
+          volume = Math.min(Math.max(volume, 0), 1);
+          volumeSlider.style.height = `${volume * 100}%`;
+          // Aquí se podría vincular el volumen general
+        };
+        document.addEventListener("mousemove", mouseMove);
+        document.addEventListener("mouseup", () => {
+          document.removeEventListener("mousemove", mouseMove);
+        });
+      });
+
+      // Funcionalidad para el crossfader
+      const crossfaderHandle = document.querySelector("#crossfader-handle");
+      let isDragging = false;
+
+      // Hacer que el crossfader sea arrastrable
+      crossfaderHandle.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+      });
+
+      function onMouseMove(e) {
+        if (!isDragging) return;
+        const crossfader = document.querySelector(".crossfader");
+        const rect = crossfader.getBoundingClientRect();
+        let newX = e.clientX - rect.left;
+
+        // Limitar el movimiento dentro de los límites
+        newX = Math.max(
+          0,
+          Math.min(rect.width - crossfaderHandle.offsetWidth, newX)
+        );
+
+        crossfaderHandle.style.left = `${newX}px`;
+      }
+
+      function onMouseUp() {
+        isDragging = false;
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+      }
+    </script>
+  </body>
+</html>
